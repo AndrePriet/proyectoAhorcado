@@ -12,13 +12,57 @@ Estado_ahorcado=[
 
 
 #punto 2 c funcion seleccionar palabra*****
+
 #aca estamos recibiendo el argumento que contiene toda la lista de palabras. 
 def seleccionar_palabra(lista_palabras):
 
     """ Esto es solo para prueba, lo que se requiere es variar el indice la la lista de palabras para asi siempre retornar una palabra diferente o buscar alguna forma de hacer un return aleatorio. """
-    print(lista_palabras[0])
-    palabra= lista_palabras[0]
-    return palabra
+    #esto funcionaría si la lista variara de tamaño
+    #tal vez agarrar el largo del nombre como "seed" y hacer una formula equis con eso, y luego hacer el % total_palabras para asegurarnos de que
+    #siempre quede dentro del tamaño de la lista?
+
+    total_palabras = len(lista_palabras)
+    indice = (7 * total_palabras + 3) % total_palabras  # pseudoaleatoria
+    return lista_palabras[indice]
+
+
+def mostrar_ahorcado(intentos_restantes):
+    """
+    lo del dibujo
+    """
+    print(Estado_ahorcado[6 - intentos_restantes])
+
+# Función para manejar el turno del jugador
+def manejar_turno(palabra, estado, letras_adivinadas, intentos_restantes):
+    """
+    se ingresa una letra y si es valida se actualiza el estado dependiendo de si está o no está.
+    """
+    letra = input("\nadivina una letra: ").upper()
+    if len(letra) != 1 or not letra.isalpha():
+        print("solo puedes ingresar una sola letra a la vez")
+        return intentos_restantes
+    if letra in letras_adivinadas:
+        print("ya se probó esa letra. Intenta con otra.")
+        return intentos_restantes
+    letras_adivinadas.append(letra)
+    if letra in palabra:
+        for i in range(len(palabra)):
+            if palabra[i] == letra:
+                estado[i] = letra
+        print("correcto")
+    else:
+        intentos_restantes -= 1
+        print("no está esa letra")
+    return intentos_restantes
+
+def verificar_fin_del_juego(estado, intentos_restantes, palabra):
+    if "_" not in estado:
+        print("felicidades, adivinaste que la palabra era", "".join(estado))
+        return True
+    if intentos_restantes <= 0:
+        print("perdiste, la palabra era", palabra)
+        return True
+    return False
 
 
 #declaramos la funcion para dar inicio al juego al seleccionarse la opción a.
@@ -32,12 +76,20 @@ def iniciarJuego():
 
     print("!Hola ",player," bienvenido al juego de ahorcado!\n")
 
-    seleccionar_palabra(lista_palabras)
-    print("\n")
+    palabra = seleccionar_palabra(lista_palabras)
+    estado = ["_" for _ in palabra]
+    letras_adivinadas = []
+    intentos_restantes = 6
+
+    while True:
+        print("\nEstado actual: ", " ".join(estado))
+        mostrar_ahorcado(intentos_restantes)
+        intentos_restantes = manejar_turno(palabra, estado, letras_adivinadas, intentos_restantes)
+        if verificar_fin_del_juego(estado, intentos_restantes, palabra):
+            break
 
 
 #punto 2 b*************************************************************************
-#Se define la funcion cargar palabras
 def cargar_palabras(archivo):
     #se declara la lista donde se almacenaran las palabras que existen en el archivo.txt
     palabras=[]
